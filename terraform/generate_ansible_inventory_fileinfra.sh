@@ -1,4 +1,4 @@
-cat > ../ansible/inventory.ini <<EOF
+cat > ../inventory/inventory.ini <<EOF
 [webservers]
 skillbox_vm_1 ansible_host=$(terraform output -raw external_ip_address_skillbox_vm_1)
 

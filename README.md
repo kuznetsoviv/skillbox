@@ -1,10 +1,21 @@
-# Terraform Configuration
+# Инструкцря
 
-## Environment Variables Setup
+## Необходимые пакеты
 
-Run these commands in your console to configure Terraform with Yandex Cloud:
+- ansible
+- terrafrom
+
+## Подготовка terrafrom
 
 ```bash
 export YC_TOKEN=$(yc config get token)
 export YC_CLOUD_ID=$(yc config get cloud-id)
 export YC_FOLDER_ID=$(yc config get folder-id)
+```
+
+## Алгоритм
+
+- terraform terraform/main.tf init
+- terraform terraform/main.tf apply
+- cd terraform && ./generate_ansible_inventory.sh
+- ansible-playbook -i inventory/inventory.ini ansible/install_docker.yml

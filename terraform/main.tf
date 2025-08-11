@@ -66,6 +66,7 @@ resource "yandex_lb_network_load_balancer" "skillbox_balancer" {
   listener {
     name = "http-listener"
     port = 80
+    target_port = 8080
     external_address_spec {
       ip_version = "ipv4"
     }
@@ -73,7 +74,7 @@ resource "yandex_lb_network_load_balancer" "skillbox_balancer" {
 
   attached_target_group {
     target_group_id = yandex_lb_target_group.skillbox_target_group.id
-    
+
     healthcheck {
       name = "http-healthcheck"
       http_options {

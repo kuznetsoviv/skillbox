@@ -43,5 +43,5 @@
     - name: Add user to docker group
       user:
         name: "{{ ansible_user }}"
-        groups": docker
+        groups: docker
         append: yes  

@@ -62,3 +62,6 @@ terraform.rc
 
 # Ignore Windows system files
 Thumbs.db
+
+# inventory
+inventory.ini

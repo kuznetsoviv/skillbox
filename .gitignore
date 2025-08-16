@@ -1,0 +1,67 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control
+# !example_override.tf
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore lock files
+.terraform.lock.hcl
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore build artifacts
+*.zip
+*.tar.gz
+
+# Ignore plan output files
+*.tfplan
+*.plan
+
+# Ignore Terraform cache directory
+.terraform/
+
+# Ignore Terragrunt cache
+.terragrunt-cache/
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows system files
+Thumbs.db
+
+# inventory
+inventory.ini

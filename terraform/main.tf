@@ -14,8 +14,35 @@ data "yandex_compute_image" "ubuntu_2204" {
   family = "ubuntu-2204-lts"
 }
 
-resource "yandex_compute_instance" "skillbox_vm_1" {
-  name        = "skillbox-vm-1"
+
+resource "yandex_compute_instance" "skillbox_vm_gitlab_runner" {
+  name        = "skillbox-vm-gitlab-runner"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-a"
+
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "${data.yandex_compute_image.ubuntu_2204.id}"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.skillbox_subnet.id
+    nat = true
+  }
+
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/skillbox_rsa.pub")}"
+  }
+}
+
+resource "yandex_compute_instance" "skillbox_vm_service" {
+  name        = "skillbox-vm-service"
   platform_id = "standard-v1"
   zone        = "ru-central1-a"
 
@@ -56,7 +83,7 @@ resource "yandex_lb_target_group" "skillbox_target_group" {
 
   target {
     subnet_id = yandex_vpc_subnet.skillbox_subnet.id
-    address   = yandex_compute_instance.skillbox_vm_1.network_interface.0.ip_address
+    address   = yandex_compute_instance.skillbox_vm_service.network_interface.0.ip_address
   }
 }
 
@@ -85,8 +112,12 @@ resource "yandex_lb_network_load_balancer" "skillbox_balancer" {
   }
 }
 
-output "external_ip_address_skillbox_vm_1" {
-  value = yandex_compute_instance.skillbox_vm_1.network_interface.0.nat_ip_address
+output "external_ip_address_skillbox_vm_gitlab_runner" {
+  value = yandex_compute_instance.skillbox_vm_gitlab_runner.network_interface.0.nat_ip_address
+}
+
+output "external_ip_address_skillbox_vm_service" {
+  value = yandex_compute_instance.skillbox_vm_service.network_interface.0.nat_ip_address
 }
 
 output "skillbox_balancer" {

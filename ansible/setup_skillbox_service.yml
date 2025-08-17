@@ -1,6 +1,6 @@
 ---
-- name: Install Docker
-  hosts: all
+- name: Setup skillbox service
+  hosts: webserver 
   become: yes
   
   tasks:

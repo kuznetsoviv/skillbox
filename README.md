@@ -8,6 +8,7 @@
 ## Подготовка terrafrom
 
 ```bash
+export REGISTRATION_TOKEN=<GITLAB_REGISTRATION_TOKEN>
 export YC_TOKEN=$(yc config get token)
 export YC_CLOUD_ID=$(yc config get cloud-id)
 export YC_FOLDER_ID=$(yc config get folder-id)
@@ -15,7 +16,9 @@ export YC_FOLDER_ID=$(yc config get folder-id)
 
 ## Алгоритм
 
-- terraform terraform/main.tf init
-- terraform terraform/main.tf apply
-- cd terraform && ./generate_ansible_inventory.sh
-- ansible-playbook -i inventory/inventory.ini ansible/install_docker.yml
+- генерация ssh ключа: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/skillbox_rsa`
+- инициализация terraform: `terraform terraform/main.tf init`
+- создание инфраструктуры: `terraform terraform/main.tf apply`
+- создание ansible inventory файла: `cd terraform && ./generate_ansible_inventory.sh`
+- запуск gitlab агента: `ansible-playbook -i inventory/inventory.ini ansible/setup_skillbox_gitlab_runner.yml`
+- запуск gitlab сервиса: `ansible-playbook -i inventory/inventory.ini ansible/setup_skillbox_service.yml`

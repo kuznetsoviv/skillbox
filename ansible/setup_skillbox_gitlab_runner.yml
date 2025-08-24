@@ -90,4 +90,10 @@
         name: "{{ ansible_user }}"
         groups: docker
         append: yes  
+    
+    - name: Add gitlab-runner to docker group
+      user:
+        name: gitlab-runner
+        groups: docker
+        append: yes      
 

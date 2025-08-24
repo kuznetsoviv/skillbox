@@ -8,7 +8,7 @@
 ## Подготовка terrafrom
 
 ```bash
-export REGISTRATION_TOKEN=<GITLAB_REGISTRATION_TOKEN>
+export GITLAB_RUNNER_REGISTRATION_TOKEN=<GITLAB_RUNNER_REGISTRATION_TOKEN>
 export YC_TOKEN=$(yc config get token)
 export YC_CLOUD_ID=$(yc config get cloud-id)
 export YC_FOLDER_ID=$(yc config get folder-id)

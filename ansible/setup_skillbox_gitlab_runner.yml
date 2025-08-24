@@ -3,12 +3,11 @@
   hosts: gitlabrunner 
   become: yes
   vars:
-    gitlab_runner_url: https://gitlab.skillbox.ru/
-    gitlab_api_token: "{{ lookup('env', 'gitlab_api_token') }}" 
-    runner_registration_token: "{{ lookup('env', 'runner_registration_token') }}"
-    runner_description: "runner for skillbox service"
-    runner_executor: "shell"
-    runner_tags: "skillbox"    
+    gitlab_runner_coordinator_url: https://gitlab.skillbox.ru/
+    gitlab_runner_registration_token: "{{ lookup('env','GITLAB_RUNNER_REGISTRATION_TOKEN') }}"
+    gitlab_runner_description: "Runner for skillbox service"
+    gitlab_runner_executor: "shell"
+    gitlab_runner_tags: "skillbox"    
   
   tasks:
     - name: Install required system packages
@@ -37,26 +36,30 @@
       package:
         name: gitlab-runner
         state: present
+    
+    - name: Ensure Gitlab Runner service is started and enabled
+      service:
+        name: gitlab-runner
+        state: started
+        enabled: yes      
 
-    - name: Print a message
-      debug:
-        msg: "{{ runner_registration_token }}"
+    - name: Check if runner is already in config.toml
+      shell: grep -q "{{ gitlab_runner_description }}" /etc/gitlab-runner/config.toml
+      register: runner_check
+      failed_when: false
+      changed_when: false  
 
     - name: Register Gitlab Runner
-      become: no
-      community.general.gitlab_runner:
-        api_url: "{{ gitlab_runner_url }}"
-        api_token: "{{ gitlab_api_token }}"  
-        registration_token: "{{ runner_registration_token }}"
-        description: "{{ runner_description }}"
-        executor: "{{ runner_executor }}"
-        tags: "{{ runner_tags }}"
-        state: present
-      args:
-        executable: gitlab-runner
-      notify:
-        - restart gitlab-runner        
-     
+      command: >
+        gitlab-runner register
+        --non-interactive
+        --url "{{ gitlab_runner_coordinator_url }}"
+        --registration-token "{{ gitlab_runner_registration_token }}"
+        --executor "{{ gitlab_runner_executor }}"
+        --description "{{ gitlab_runner_description }}"
+        --tag-list "{{ gitlab_runner_tags }}"
+      when: runner_check.rc != 0  
+
     - name: Add Docker GPG key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -87,10 +90,4 @@
         name: "{{ ansible_user }}"
         groups: docker
         append: yes  
-
-  handlers:
-    - name: restart gitlab-runner
-      systemd:
-        name: gitlab-runner
-        state: restarted
 

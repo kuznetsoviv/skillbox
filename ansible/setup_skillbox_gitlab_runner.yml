@@ -17,7 +17,7 @@
           - ca-certificates
           - curl
           - software-properties-common
-          - gnupg
+          - gnupg  
         state: present
         update_cache: yes
 
@@ -96,4 +96,15 @@
         name: gitlab-runner
         groups: docker
         append: yes      
+    
+    - name: Add Ansible PPA
+      apt_repository:
+        repo: ppa:ansible/ansible
+        state: present
+
+    - name: Install Ansible
+      apt:
+        name: ansible
+        state: latest
+        update_cache: yes      
 

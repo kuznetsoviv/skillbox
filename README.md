@@ -17,8 +17,12 @@ export YC_FOLDER_ID=$(yc config get folder-id)
 ## Алгоритм
 
 - генерация ssh ключа: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/skillbox_rsa`
-- инициализация terraform: `terraform terraform/main.tf init`
-- создание инфраструктуры: `terraform terraform/main.tf apply`
-- создание ansible inventory файла: `cd terraform && ./generate_ansible_inventory.sh`
-- запуск gitlab агента: `ansible-playbook -i inventory/inventory.ini ansible/setup_skillbox_gitlab_runner.yml`
-- запуск gitlab сервиса: `ansible-playbook -i inventory/inventory.ini ansible/setup_skillbox_service.yml`
+- инициализация terraform: `terraform -chdir=./terraform init`
+- создание инфраструктуры: `terraform -chdir=./terraform apply`
+- создание ansible inventory файла: `./terraform/generate_ansible_inventory.sh`
+- подготовка инфраструктуры для skillbox сервиса: `ansible-playbook -i inventory/inventory.ini ansible/app/setup-skillbox-devops-service.yml`
+- запуск gitlab агента: `ansible-playbook -i inventory/inventory.ini ansible/gitlab-runner/setup-skillbox-gitlab-runner.yml`
+- запуск мониторинга: `ansible-playbook -i inventory/inventory.ini ansible/monitoring/setup-monitoring.yml -e app_ip=$(cd ./terraform && terraform output -raw external_ip_address_skillbox_vm_service_dev)`
+
+## Обоснование выбора системы мониторинга
+[LADR](https://gitlab.skillbox.ru/igor_kuznetsov_6/infra/-/blob/feature/task-3/ansible/monitoring/README.md)

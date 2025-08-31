@@ -39,7 +39,44 @@ resource "yandex_compute_instance" "skillbox_vm_gitlab_runner" {
   metadata = {
     ssh-keys = "ubuntu:${file("~/.ssh/skillbox_rsa.pub")}"
   }
+
+  labels = {
+    role = "gitlabrunner"
+  }
+
 }
+
+resource "yandex_compute_instance" "skillbox_vm_monitoring" {
+  name        = "skillbox-vm-monitoring"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-a"
+
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "${data.yandex_compute_image.ubuntu_2204.id}"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.skillbox_subnet.id
+    nat = true
+  }
+
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/skillbox_rsa.pub")}"
+  }
+  
+  labels = {
+    role = "monitoring"
+  }
+ 
+}
+
 
 resource "yandex_compute_instance" "skillbox_vm_service" {
   name        = "skillbox-vm-service"
@@ -65,6 +102,12 @@ resource "yandex_compute_instance" "skillbox_vm_service" {
   metadata = {
     ssh-keys = "ubuntu:${file("~/.ssh/skillbox_rsa.pub")}"
   }
+
+  labels = {
+    role = "backend"
+    env = "dev"
+  }
+
 }
 
 resource "yandex_vpc_network" "skillbox_network" {
@@ -116,11 +159,15 @@ output "external_ip_address_skillbox_vm_gitlab_runner" {
   value = yandex_compute_instance.skillbox_vm_gitlab_runner.network_interface.0.nat_ip_address
 }
 
-output "external_ip_address_skillbox_vm_service" {
+output "external_ip_address_skillbox_vm_monitoring" {
+  value = yandex_compute_instance.skillbox_vm_monitoring.network_interface.0.nat_ip_address
+}
+
+output "external_ip_address_skillbox_vm_service_dev" {
   value = yandex_compute_instance.skillbox_vm_service.network_interface.0.nat_ip_address
 }
 
-output "skillbox_balancer" {
+output "skillbox_balancer_dev" {
   value = yandex_lb_network_load_balancer.skillbox_balancer.listener[*].external_address_spec[*].address
 }
 

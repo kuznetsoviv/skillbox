@@ -1,5 +1,5 @@
 ---
-- name: Setup skillbox service
+- name: Setup skillbox devops service
   hosts: webserver 
   become: yes
   
@@ -12,6 +12,7 @@
           - curl
           - software-properties-common
           - gnupg
+          - prometheus-node-exporter
         state: present
         update_cache: yes
      
@@ -44,4 +45,10 @@
       user:
         name: "{{ ansible_user }}"
         groups: docker
-        append: yes  
+        append: yes
+
+    - name: Ensure node_exporter service is started and enabled
+      systemd: 
+        name: prometheus-node-exporter
+        state: started
+        enabled: yes     

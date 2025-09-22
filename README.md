@@ -16,13 +16,20 @@ export YC_FOLDER_ID=$(yc config get folder-id)
 
 ## Алгоритм
 
-- генерация ssh ключа: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/skillbox_rsa`
+- генерация ssh ключей: 
+  - для окружения тестирования: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/test_skillbox_rsa`
+  - для окружения продакшена: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/prod_skillbox_rsa`
+  - для ci/cd и мониторинга: `ssh-keygen -t rsa -b 4096 -C "<your_email>" -f ~/.ssh/prod_skillbox_rsa`
+
 - инициализация terraform: `terraform -chdir=./terraform init`
 - создание инфраструктуры: `terraform -chdir=./terraform apply`
-- создание ansible inventory файла: `./terraform/generate_ansible_inventory.sh`
-- подготовка инфраструктуры для skillbox сервиса: `ansible-playbook -i inventory/inventory.ini ansible/app/setup-skillbox-devops-service.yml`
-- запуск gitlab агента: `ansible-playbook -i inventory/inventory.ini ansible/gitlab-runner/setup-skillbox-gitlab-runner.yml`
-- запуск мониторинга: `ansible-playbook -i inventory/inventory.ini ansible/monitoring/setup-monitoring.yml -e app_ip=$(cd ./terraform && terraform output -raw external_ip_address_skillbox_vm_service_dev)`
+- создание ansible inventory файла: `./terraform/generate_inventory.sh`
+- настройка развернутых серверов: 
+    ```
+      ansible-playbook -i inventory/inventory.ini ./ansible/site.yml \
+      -e test_application_ip=$(terraform -chdir=./terraform output -raw external_ip_address_skillbox_service_test) \
+      -e prod_application_ip=$(terraform -chdir=./terraform output -raw external_ip_address_skillbox_service_prod)
+    ```
 
 ## Обоснование выбора системы мониторинга
 [LADR](https://gitlab.skillbox.ru/igor_kuznetsov_6/infra/-/blob/feature/task-3/ansible/monitoring/README.md)

@@ -1,0 +1,43 @@
+---
+- name: Setup skillbox devops services
+  hosts: test_webserver:prod_webserver 
+  become: yes
+  
+  roles:
+    - common
+    - docker
+    
+  tasks:
+    - name: Install prometheus-node-exporter
+      apt:
+        name: prometheus-node-exporter
+        state: present
+        update_cache: yes
+
+    - name: Ensure node_exporter service is started and enabled
+      systemd: 
+        name: prometheus-node-exporter
+        state: started
+        enabled: yes
+
+
+- name: Setup skillbox gitlab runner
+  hosts: gitlabrunner 
+  become: yes
+  
+  vars:
+    gitlab_runner_registration_token: "{{ lookup('env','GITLAB_RUNNER_REGISTRATION_TOKEN') }}"
+  
+  roles:
+    - common
+    - docker
+    - gitlab-runner
+
+- name: Setup monitoring
+  hosts: monitoring
+  become: yes
+  
+  roles:
+    - common
+    - docker
+    - monitoring    

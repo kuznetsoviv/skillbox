@@ -1,0 +1,67 @@
+---
+- name: Install monitoring packages
+  apt:
+    name:
+      - prometheus
+      - prometheus-node-exporter  
+    state: present
+    update_cache: yes
+
+- name: Copy Prometheus config
+  template: 
+    src: prometheus.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
+  notify: Restart Prometheus
+
+- name: Ensure node_exporter service is started
+  systemd:
+    name: prometheus-node-exporter
+    state: started
+    enabled: yes      
+
+- name: Pull Grafana Docker Image
+  docker_image:
+    name: grafana/grafana
+    tag: main-ubuntu
+    source: pull
+
+- name: Create Grafana data directory
+  file:
+    path: /var/lib/grafana
+    state: directory
+    owner: "472"
+    group: "472"
+    mode: '0755'    
+
+- name: Create Grafana provisioning directory
+  file:
+    path: "/etc/grafana/provisioning/datasources"
+    state: directory
+    owner: "472"
+    group: "472"
+    mode: "0755"
+
+- name: Copy Grafana datasources configuration
+  template:
+    src: datasources.j2
+    dest: "/etc/grafana/provisioning/datasources/datasources.yml"
+    owner: "472"
+    group: "472"
+    mode: "0644"      
+
+- name: Run Grafana container
+  docker_container:
+    name: grafana
+    image: grafana/grafana:main-ubuntu
+    state: started
+    restart_policy: always  
+    ports:
+      - "3000:3000"
+    etc_hosts:
+      host.docker.internal: host-gateway    
+    volumes:
+      - /var/lib/grafana:/var/lib/grafana
+      - /etc/grafana/provisioning:/etc/grafana/provisioning

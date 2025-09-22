@@ -1,0 +1,88 @@
+---
+- name: Add Gitlab repository public key
+  apt_key:
+    url: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
+    state: present
+
+- name: Add Gitlab Runner repository
+  apt_repository:
+    repo: deb https://packages.gitlab.com/runner/gitlab-runner/ubuntu/ {{ ansible_distribution_release }} main        
+    state: present
+    filename: gitlab-runner
+
+- name: Install Gitlab Runner
+  apt:
+    name: gitlab-runner
+    state: present
+    update_cache: yes
+
+- name: Ensure Gitlab Runner service is started and enabled
+  service:
+    name: gitlab-runner
+    state: started
+    enabled: yes      
+
+- name: Check if runner is already in config.toml
+  shell: grep -q "{{ gitlab_runner_description }}" /etc/gitlab-runner/config.toml
+  register: runner_check
+  failed_when: false
+  changed_when: false  
+
+- name: Register Gitlab Runner
+  command: >
+    gitlab-runner register
+    --non-interactive
+    --url "{{ gitlab_runner_coordinator_url }}"
+    --registration-token "{{ gitlab_runner_registration_token }}"
+    --executor "{{ gitlab_runner_executor }}"
+    --description "{{ gitlab_runner_description }}"
+    --tag-list "{{ gitlab_runner_tags }}"
+  when: runner_check.rc != 0  
+
+- name: Add gitlab-runner to docker group
+  user:
+    name: gitlab-runner
+    groups: docker
+    append: yes      
+
+- name: Add Ansible PPA
+  apt_repository:
+    repo: ppa:ansible/ansible
+    state: present
+
+- name: Install Ansible
+  apt:
+    name: ansible
+    state: latest
+    update_cache: yes
+
+- name: Create inventory directory
+  file:
+    path: /inventory
+    state: directory
+    owner: gitlab-runner
+    group: gitlab-runner
+    mode: '0755'    
+
+- name: Copy Test inventory
+  template: 
+    src: inventory.j2
+    dest: /inventory/test_inventory.yml
+    owner: gitlab-runner
+    group: gitlab-runner
+    mode: '0644'
+  vars:
+    env: test
+    application_ip: "{{ test_application_ip }}"
+
+- name: Copy Prod inventory
+  template: 
+    src: inventory.j2
+    dest: /inventory/prod_inventory.yml
+    owner: gitlab-runner
+    group: gitlab-runner
+    mode: '0644'
+  vars:
+    env: prod
+    application_ip: "{{ prod_application_ip }}"  
+

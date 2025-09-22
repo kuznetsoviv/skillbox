@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 0,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -70,11 +70,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0-17761253458",
+      "pluginVersion": "12.3.0-17807715777",
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "up{instance=\"158.160.46.55:9100\"}",
+          "expr": "up{env=\"$env\", type=\"node_exporter\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -132,7 +132,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0-17761253458",
+      "pluginVersion": "12.3.0-17807715777",
       "targets": [
         {
           "datasource": {
@@ -140,7 +140,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "up{instance=\"158.160.46.55:8080\"}",
+          "expr": "up{env=\"$env\", type=\"application\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -230,11 +230,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0-17761253458",
+      "pluginVersion": "12.3.0-17807715777",
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "node_load15{instance=\"158.160.46.55:9100\"}",
+          "expr": "node_load15{env=\"$env\", type=\"node_exporter\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -251,8 +251,8 @@
     "list": [
       {
         "current": {
-          "text": "dev",
-          "value": "dev"
+          "text": "prod",
+          "value": "prod"
         },
         "datasource": {
           "type": "prometheus",
@@ -281,5 +281,5 @@
   "timezone": "browser",
   "title": "skillbox_dashoard",
   "uid": "adhfm6h",
-  "version": 6
+  "version": 5
 }

@@ -161,3 +161,60 @@ output "external_ip_address_skillbox_monitoring" {
   value       = yandex_compute_instance.skillbox_instances["monitoring"].network_interface.0.nat_ip_address
   description = "External IP address of monitoring instance"
 }
+
+resource "yandex_mdb_opensearch_cluster" "skillbox_opensearch" {
+  name        = "skillbox-opensearch"
+  environment = "PRODUCTION"
+  network_id  = yandex_vpc_network.skillbox_network.id
+
+  config {
+    version = "2.12"
+    
+    admin_password = "Skillbox123!"
+
+    opensearch {
+      node_groups {
+        name             = "data_group"
+        assign_public_ip = true
+        hosts_count      = 1
+        subnet_ids       = [yandex_vpc_subnet.skillbox_subnet.id]
+        zone_ids         = ["ru-central1-a"]
+        roles            = ["data", "manager"]
+        resources {
+          resource_preset_id = "s2.micro"
+          disk_size          = 10737418240  # 10GB in bytes
+          disk_type_id       = "network-hdd"
+        }
+      }
+    }
+
+    dashboards {
+      node_groups {
+        name             = "dashboards"
+        assign_public_ip = true
+        hosts_count      = 1
+        subnet_ids       = [yandex_vpc_subnet.skillbox_subnet.id]
+        zone_ids         = ["ru-central1-a"]
+        resources {
+          resource_preset_id = "b2.medium"
+          disk_size          = 10737418240  # 10GB in bytes
+          disk_type_id       = "network-ssd"
+        }
+      }
+    }
+  }
+
+  maintenance_window {
+    type = "ANYTIME"
+  }
+}
+
+output "opensearch_endpoint" {
+  value       = "yandex_mdb_opensearch_cluster.skillbox_opensearch.hosts[0].fqdn"
+  description = "OpenSearch cluster endpoint"
+}
+
+output "opensearch_dashboards_endpoint" {
+  value       = "yandex_mdb_opensearch_cluster.skillbox_opensearch.hosts[1].fqdn"
+  description = "OpenSearch Dashboards endpoint"
+}

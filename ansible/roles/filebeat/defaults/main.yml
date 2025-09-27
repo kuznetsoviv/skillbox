@@ -1,0 +1,8 @@
+---
+fluent_bit_version: "2.2"
+opensearch_host: "{{ opensearch_endpoint }}"
+opensearch_port: 9200
+opensearch_username: "admin"
+opensearch_password: "{{ lookup('env','OPENSEARCH_PASSWORD') | default('Skillbox123!') }}"
+
+

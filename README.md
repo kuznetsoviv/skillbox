@@ -25,10 +25,10 @@ export YC_FOLDER_ID=$(yc config get folder-id)
 - создание инфраструктуры: `terraform -chdir=./terraform apply`
 - создание ansible inventory файла: `./terraform/generate_inventory.sh`
 - настройка развернутых серверов: 
-    ```
-      ansible-playbook -i inventory/inventory.ini ./ansible/site.yml \
-      -e test_application_ip=$(terraform -chdir=./terraform output -raw external_ip_address_skillbox_service_test) \
-      -e prod_application_ip=$(terraform -chdir=./terraform output -raw external_ip_address_skillbox_service_prod)
+    ```bash
+    export OPENSEARCH_PASSWORD="Skillbox123!"
+    ansible-playbook -i inventory/inventory.ini ./ansible/site.yml \
+      -e opensearch_endpoint=$(terraform -chdir=./terraform output -raw opensearch_endpoint)
     ```
 
 ## Обоснование выбора системы мониторинга

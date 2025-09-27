@@ -1,0 +1,36 @@
+---
+- name: Ensure Fluent Bit config directory exists
+  file:
+    path: /etc/fluent-bit
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy Fluent Bit config
+  template:
+    src: fluent-bit.conf.j2
+    dest: /etc/fluent-bit/fluent-bit.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Pull Fluent Bit Docker image
+  docker_image:
+    name: fluent/fluent-bit
+    tag: "2.2"
+    source: pull
+
+- name: Run Fluent Bit container
+  docker_container:
+    name: fluent-bit
+    image: fluent/fluent-bit:2.2
+    state: started
+    restart_policy: always
+    user: root
+    command: ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/etc/fluent-bit.conf"]
+    volumes:
+      - /var/log:/var/log:ro
+      - /etc/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+
+

@@ -1,4 +1,2 @@
 ---
-test_application_ip: "127.0.0.1"
-prod_application_ip: "127.0.0.1"  
 prometheus_host: "host.docker.internal"

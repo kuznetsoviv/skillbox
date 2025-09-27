@@ -1,0 +1,40 @@
+[SERVICE]
+    Flush         1
+    Log_Level     info
+    Daemon        off
+    Parsers_File  parsers.conf
+    HTTP_Server   On
+    HTTP_Listen   0.0.0.0
+    HTTP_Port     2020
+
+[INPUT]
+    Name              tail
+    Path              /var/log/syslog
+    Tag               syslog
+    Parser            syslog-rfc3164
+    Refresh_Interval  5
+    Mem_Buf_Limit     50MB
+    Skip_Long_Lines   On
+
+[INPUT]
+    Name              tail
+    Path              /var/log/auth.log
+    Tag               auth
+    Parser            syslog-rfc3164
+    Refresh_Interval  5
+    Mem_Buf_Limit     50MB
+    Skip_Long_Lines   On
+
+[OUTPUT]
+    Name  opensearch
+    Match *
+    Host  {{ opensearch_host }}
+    Port  {{ opensearch_port }}
+    Index fluent-bit
+    Type  _doc
+    HTTP_User {{ opensearch_username }}
+    HTTP_Passwd {{ opensearch_password }}
+    tls   On
+    tls.verify Off
+    tls.debug 2
+    suppress_type_name On

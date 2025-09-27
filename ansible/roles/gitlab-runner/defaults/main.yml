@@ -1,6 +1,4 @@
 ---
-test_application_ip: "127.0.0.1"
-prod_application_ip: "127.0.0.1"  
 gitlab_runner_coordinator_url: https://gitlab.skillbox.ru/
 gitlab_runner_description: "Runner for skillbox service"
 gitlab_runner_executor: "shell"

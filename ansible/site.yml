@@ -2,10 +2,11 @@
 - name: Setup skillbox devops services
   hosts: test_webserver:prod_webserver 
   become: yes
-  
+
   roles:
     - common
     - docker
+    - filebeat
     
   tasks:
     - name: Install prometheus-node-exporter
@@ -26,6 +27,8 @@
   become: yes
   
   vars:
+    test_application_ip: "{{ hostvars[groups['test_webserver'][0]].ansible_host }}"
+    prod_application_ip: "{{ hostvars[groups['prod_webserver'][0]].ansible_host }}"
     gitlab_runner_registration_token: "{{ lookup('env','GITLAB_RUNNER_REGISTRATION_TOKEN') }}"
   
   roles:
@@ -37,7 +40,11 @@
   hosts: monitoring
   become: yes
   
+  vars:
+    test_application_ip: "{{ hostvars[groups['test_webserver'][0]].ansible_host }}"
+    prod_application_ip: "{{ hostvars[groups['prod_webserver'][0]].ansible_host }}"
+  
   roles:
     - common
     - docker
-    - monitoring    
+    - monitoring   

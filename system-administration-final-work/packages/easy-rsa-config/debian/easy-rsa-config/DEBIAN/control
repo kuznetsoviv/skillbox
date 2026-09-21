@@ -1,0 +1,9 @@
+Package: easy-rsa-config
+Version: 1.0-1
+Architecture: all
+Maintainer: kuznetsoviv <igor@gmail.com>
+Installed-Size: 20
+Depends: easy-rsa
+Section: ca-configuration
+Priority: optional
+Description: vars file for generation ca with easy-rsa

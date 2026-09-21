@@ -1,0 +1,58 @@
+variables:
+  PROJECT_ROOT: Final_project
+  IMAGE_NAME: skillbox-devops-service
+  IMAGE_TAG: $CI_PIPELINE_IID
+  DOCKER_IMAGE: "$DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG"
+
+default:
+  tags:
+    - skillbox
+  before_script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp "$TEST_SSH_PRIVATE_KEY" ~/.ssh/test_skillbox_rsa
+    - chmod 600 ~/.ssh/test_skillbox_rsa
+    - cp "$PROD_SSH_PRIVATE_KEY" ~/.ssh/prod_skillbox_rsa
+    - chmod 600 ~/.ssh/prod_skillbox_rsa
+
+stages:
+  - build
+  - test
+  - push_docker_image
+  - deploy_to_test
+  - deploy_to_prod
+
+build_job:
+  stage: build
+  script:
+    - docker build -t $DOCKER_IMAGE ./$PROJECT_ROOT
+
+test_job:
+  stage: test
+  script:
+    - cd $PROJECT_ROOT
+    - chmod +x ./run-tests.sh
+    - chmod +x ./scripts/test_in_docker.sh
+    - ./run-tests.sh  
+
+push_docker_image_job:
+  stage: push_docker_image
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PERSONAL_ACCESS_TOKEN
+    - docker push $DOCKER_IMAGE
+
+deploy_to_test_job:
+  stage: deploy_to_test
+  script:
+    - ansible-playbook -i /inventory/test_inventory.yml ./ansible/deploy_service.yml -e "service_version=$IMAGE_TAG"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "uat"
+
+deploy_to_prod_job:
+  stage: deploy_to_prod
+  script:
+    - ansible-playbook -i /inventory/prod_inventory.yml ./ansible/deploy_service.yml -e "service_version=$IMAGE_TAG"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+
+

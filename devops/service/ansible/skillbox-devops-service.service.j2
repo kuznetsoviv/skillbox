@@ -1,0 +1,17 @@
+[Unit]
+Description=Skillbox devops service
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/bin/docker run --name skillbox-devops-service \
+	-p 8080:8080 \
+	--rm \
+	kuznetsoviv/skillbox-devops-service:{{ service_version }}
+
+ExecStop=/usr/bin/docker stop -t 2 skillbox-devops-service
+ExecStopPost=/usr/bin/docker rm -f skillbox-devops-service
+
+[Install]
+WantedBy=multi-user.target
